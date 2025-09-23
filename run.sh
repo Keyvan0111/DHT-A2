@@ -13,7 +13,7 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$PROJECT_DIR/$LOG_DIR"
 
 # Build the Go server
-( cd "$PROJECT_DIR" && go build -o "${SERVER_BIN#./}" ./server.go )
+( cd "$PROJECT_DIR" && go build -o "${SERVER_BIN#./}" ./cmd/app/server.go )
 
 # ---------- get nodes ----------
 declare -a NODES=()
