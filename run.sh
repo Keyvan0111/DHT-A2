@@ -29,6 +29,12 @@ if ((${#NODES[@]} == 0)); then
   exit 4
 fi
 
+for ((i = 0; i<NUM; i++)); do
+  node="${NODES[$(( i % ${#NODES[@]} ))]}"
+  
+  port=""
+    port="$(cat "$port_file" 2>/dev/null || true)"
+
 # ---------- launch & collect ----------
 declare -a HOSTPORTS=()
 

@@ -7,17 +7,15 @@ import (
 	"os"
 	"strings"
 	"github.com/gin-gonic/gin"
-
-	"main/utils"
 )
 
 type Node struct {
-	Host: string 
-	Port: int 
-	NodeId: int // This is the sum of the hash bytes
-	SucessorId: int 
-	PredecessorId: int 
-	Nodes: []*Node // Store pointer to all node stucts
+	Host          string
+	Port          int
+	NodeId        int // This is the sum of the hash bytes
+	SucessorId    int
+	PredecessorId int
+	Nodes         []*Node // Store pointer to all node stucts
 }
 
 func shortHost() string {
