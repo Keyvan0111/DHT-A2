@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"strings"
+	"github.com/gin-gonic/gin"
 )
 
 func shortHost() string {
@@ -14,8 +14,6 @@ func shortHost() string {
 	if err != nil || h == "" {
 		return "unknown"
 	}
-
-	// Trim domain (e.g., c1-0.ifi.uit.no -> c1-0) to match assignment samples
 	if i := strings.IndexByte(h, '.'); i > 0 {
 		return h[:i]
 	}
@@ -23,7 +21,7 @@ func shortHost() string {
 }
 
 func main() {
-	// Pick a free port
+	// Pick a free port on IPv4
 	ln, err := net.Listen("tcp4", "0.0.0.0:0")
 	if err != nil {
 		log.Fatalf("listen error: %v", err)
@@ -32,7 +30,7 @@ func main() {
 
 	port := ln.Addr().(*net.TCPAddr).Port
 	host := shortHost()
-	host1, _ := os.Hostname()
+	fullHost, _ := os.Hostname()
 
 	// If PORT_FILE is set, write the chosen port there so run.sh can read it
 	if path := os.Getenv("PORT_FILE"); path != "" {
@@ -48,20 +46,21 @@ func main() {
 		_ = f.Close()
 	}
 
-	// Serve the required endpoint
-	mux := http.NewServeMux()
-	mux.HandleFunc("/helloworld", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "%s:%d", host, port)
+	// Gin router
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.Default()
+
+	// Routes
+	router.GET("/helloworld", func(c *gin.Context) {
 		log.Println("Hello server guys!")
+		c.String(200, "%s:%d", host, port)
 	})
 
 	fmt.Println("Hello guys im here!")
+	log.Printf("listening on %s:%d\n", fullHost, port)
 
-	log.Printf("listening on %s:%d\n", host1, port)
-
-	// Serve using the already-open socket (keeps same :0-chosen port)
-	server := &http.Server{Handler: mux}
-	if err := server.Serve(ln); err != nil && err != http.ErrServerClosed {
+	// Use Gin's RunListener to serve on the already-open socket
+	if err := router.RunListener(ln); err != nil {
 		log.Fatalf("http serve error: %v", err)
 	}
 }
