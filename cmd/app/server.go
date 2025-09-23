@@ -11,6 +11,15 @@ import (
 	"main/utils"
 )
 
+type Node struct {
+	Host: string 
+	Port: int 
+	NodeId: int // This is the sum of the hash bytes
+	SucessorId: int 
+	PredecessorId: int 
+	Nodes: []*Node // Store pointer to all node stucts
+}
+
 func shortHost() string {
 	h, err := os.Hostname()
 	if err != nil || h == "" {
@@ -47,11 +56,6 @@ func main() {
 		_ = f.Sync()
 		_ = f.Close()
 	}
-
-	key:= "Elie Nayef Neama"
-	trucHash := utils.ConsistentHash(key)
-	fmt.Println("truncated hash:", trucHash)
-
 
 	// Gin router
 	gin.SetMode(gin.ReleaseMode)

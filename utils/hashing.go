@@ -1,14 +1,17 @@
 package utils
 
 import (
-	"crypto/sha256"
+    "crypto/sha256"
+    "math/big"
 )
 
-func ConsistentHash (key string) []byte {
+func ConsistentHash(key string, m int) int {
+    hash := sha256.Sum256([]byte(key))
 
-	newHash :=sha256.New()
-	hashBytes := newHash.Sum(nil)
-	truncatedHash := hashBytes[:8]
+    num := new(big.Int).SetBytes(hash[:])
 
-	return truncatedHash
+    ringSize := new(big.Int).Lsh(big.NewInt(1), uint(m)) // 1 << m
+    mod := new(big.Int).Mod(num, ringSize)
+
+    return int(mod.Int64())
 }
