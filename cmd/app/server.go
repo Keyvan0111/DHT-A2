@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"github.com/gin-gonic/gin"
+
+	"main/routes"
 )
 
 type Node struct {
@@ -58,6 +60,8 @@ func main() {
 	// Gin router
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+
+	routes.SetupClusterRoutes(router)
 
 	// Routes
 	router.GET("/helloworld", func(c *gin.Context) {

@@ -29,11 +29,7 @@ if ((${#NODES[@]} == 0)); then
   exit 4
 fi
 
-for ((i = 0; i<NUM; i++)); do
-  node="${NODES[$(( i % ${#NODES[@]} ))]}"
-  
-  port=""
-    port="$(cat "$port_file" 2>/dev/null || true)"
+
 
 # ---------- launch & collect ----------
 declare -a HOSTPORTS=()
@@ -67,6 +63,26 @@ for ((i=0; i<NUM; i++)); do
   fi
 
   HOSTPORTS+=("${node}:${port}")
+done
+
+
+# Build JSON array
+json="["
+for ((i=0; i<${#HOSTPORTS[@]}; i++)); do
+  host="${HOSTPORTS[$i]%%:*}"
+  port="${HOSTPORTS[$i]##*:}"
+  (( i > 0 )) && json+=","
+  json+="{\"host\":\"${host}\",\"port\":\"${port}\"}"
+done
+json+="]"
+
+# Broadcast to all servers
+for hp in "${HOSTPORTS[@]}"; do
+  host="${hp%%:*}"
+  port="${hp##*:}"
+  curl -sS -X POST "http://${host}.ifi.uit.no:${port}/cluster/fetch_nodes" \
+       -H 'Content-Type: application/json' \
+       -d "${json}"
 done
 
 # ---------- print JSON list ----------
