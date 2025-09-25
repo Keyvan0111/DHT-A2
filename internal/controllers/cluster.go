@@ -18,9 +18,10 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 			return
 		}
 
-		fmt.Printf("Im node: %s\n", myNode.Addr)
 		utils.SortNodes(clusterNodes)
-		utils.AddAllNodes(myNode, clusterNodes)
+		utils.SetPeers(myNode, clusterNodes)
+		fmt.Println("printing node...")
+		fmt.Println(myNode)
 
 		fmt.Println("")
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})

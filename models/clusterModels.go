@@ -7,10 +7,10 @@ type ClusterNodes struct {
 
 type Node struct {
 	Host          string
-	Port          int
+	Port          string
 	Addr		  string
 	NodeId        int // This is the sum of the hash bytes
-	SucessorAddr    string
+	SuccessorAddr    string
 	PredecessorAddr string
 	Nodes         []*Node // Store pointer to all node stucts
 }

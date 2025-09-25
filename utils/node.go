@@ -10,16 +10,26 @@ import (
 
 func findNodeIndex(clusterNodes []models.ClusterNodes, target *models.Node) int {
 	for i, node := range clusterNodes {
-		if node.Host == target.Host && node.Port == string(target.Port) {
+		if node.Host == target.Host && node.Port == target.Port {
 			return i
 		}
 	}
 	return -1 // not found
 }
 
-func AddAllNodes(myNode *models.Node, clusterNodes []models.ClusterNodes) {
+func SetPeers(myNode *models.Node, clusterNodes []models.ClusterNodes) {
 	selfIndex := findNodeIndex(clusterNodes, myNode)
-	fmt.Println(selfIndex)
+	successorIndex := (selfIndex + 1) % len(clusterNodes)
+	predecessorIndex := (selfIndex - 1 + len(clusterNodes)) % len(clusterNodes)
+
+	successor := clusterNodes[successorIndex] 
+	predecessor := clusterNodes[predecessorIndex]
+
+	successorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", successor.Host, successor.Port)
+	predecessorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", predecessor.Host, predecessor.Port)
+
+	myNode.SuccessorAddr = successorAddr
+	myNode.PredecessorAddr = predecessorAddr
 }
 
 func SortNodes(clusterNodes []models.ClusterNodes) {
