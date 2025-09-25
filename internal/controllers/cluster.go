@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"main/models"
+	"main/utils"
+
 	"net/http"
 	"fmt"
 
@@ -16,11 +18,9 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 			return
 		}
 
-		fmt.Printf("Im node: %s", myNode.Addr)
-
-		for _, node:= range clusterNodes {
-			fmt.Println(node)
-		}
+		fmt.Printf("Im node: %s\n", myNode.Addr)
+		utils.SortNodes(clusterNodes)
+		utils.AddAllNodes(myNode, clusterNodes)
 
 		fmt.Println("")
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})

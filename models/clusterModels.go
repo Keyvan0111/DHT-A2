@@ -10,7 +10,7 @@ type Node struct {
 	Port          int
 	Addr		  string
 	NodeId        int // This is the sum of the hash bytes
-	SucessorId    int
-	PredecessorId int
+	SucessorAddr    string
+	PredecessorAddr string
 	Nodes         []*Node // Store pointer to all node stucts
 }

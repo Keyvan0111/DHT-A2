@@ -38,15 +38,15 @@ func main() {
 	host := shortHost()
 	fullHost, err := os.Hostname()
 
-	NodeId := utils.ConsistentHash(fmt.Sprintf("%s%d", host, port))
+	NodeId := utils.ConsistentHash(fmt.Sprintf("%s:%d", host, port))
 
 	myNode := &models.Node{
 			Host: host,
 			Port: port,
-			Addr: fmt.Sprintf("%s%d", host, port),
+			Addr: fmt.Sprintf("http://%s.ifi.uit.no:%d", host, port),
 			NodeId: NodeId,
-			SucessorId: 0,
-			PredecessorId: 0,
+			SucessorId: "",
+			PredecessorId: "",
 			Nodes:         []*models.Node{},
 	}
 
