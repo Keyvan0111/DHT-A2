@@ -6,19 +6,14 @@ import (
 	"net"
 	"os"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 
+	"main/models"
 	"main/routes"
+	"main/utils"
 )
 
-type Node struct {
-	Host          string
-	Port          int
-	NodeId        int // This is the sum of the hash bytes
-	SucessorId    int
-	PredecessorId int
-	Nodes         []*Node // Store pointer to all node stucts
-}
 
 func shortHost() string {
 	h, err := os.Hostname()
@@ -41,7 +36,19 @@ func main() {
 
 	port := ln.Addr().(*net.TCPAddr).Port
 	host := shortHost()
-	fullHost, _ := os.Hostname()
+	fullHost, err := os.Hostname()
+
+	NodeId := utils.ConsistentHash(fmt.Sprintf("%s%d", host, port))
+
+	myNode := &models.Node{
+			Host: host,
+			Port: port,
+			Addr: fmt.Sprintf("%s%d", host, port),
+			NodeId: NodeId,
+			SucessorId: 0,
+			PredecessorId: 0,
+			Nodes:         []*models.Node{},
+	}
 
 	// If PORT_FILE is set, write the chosen port there so run.sh can read it
 	if path := os.Getenv("PORT_FILE"); path != "" {
@@ -61,7 +68,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
-	routes.SetupClusterRoutes(router)
+	routes.SetupClusterRoutes(router, myNode)
 
 	// Routes
 	router.GET("/helloworld", func(c *gin.Context) {

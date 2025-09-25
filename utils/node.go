@@ -1,7 +1,7 @@
 package utils
 
-import (
+import "main/models"
 
-)
-
-
+func AddAllNodes(node []models.Node)  {
+	
+}
