@@ -36,7 +36,7 @@ func main() {
 
 	port := ln.Addr().(*net.TCPAddr).Port
 	host := shortHost()
-	fullHost, err := os.Hostname()
+	fullHost, _ := os.Hostname()
 
 	NodeId := utils.ConsistentHash(fmt.Sprintf("%s:%d", host, port))
 
@@ -45,8 +45,8 @@ func main() {
 			Port: port,
 			Addr: fmt.Sprintf("http://%s.ifi.uit.no:%d", host, port),
 			NodeId: NodeId,
-			SucessorId: "",
-			PredecessorId: "",
+			SucessorAddr: "",
+			PredecessorAddr: "",
 			Nodes:         []*models.Node{},
 	}
 

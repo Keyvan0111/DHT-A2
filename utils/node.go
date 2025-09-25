@@ -1,14 +1,16 @@
 package utils
 
 import (
+	"fmt"
 	"main/models"
+
 	"strconv"
 	"strings"
 )
 
-func findNodeIndex(clusterNodes []ClusterNodes, target Node) int {
+func findNodeIndex(clusterNodes []models.ClusterNodes, target *models.Node) int {
 	for i, node := range clusterNodes {
-		if node.Host == target.Host && node.Port == target.Port {
+		if node.Host == target.Host && node.Port == string(target.Port) {
 			return i
 		}
 	}
@@ -16,7 +18,8 @@ func findNodeIndex(clusterNodes []ClusterNodes, target Node) int {
 }
 
 func AddAllNodes(myNode *models.Node, clusterNodes []models.ClusterNodes) {
-	findNodeIndex(clusterNodes, myNode)
+	selfIndex := findNodeIndex(clusterNodes, myNode)
+	fmt.Println(selfIndex)
 }
 
 func SortNodes(clusterNodes []models.ClusterNodes) {
