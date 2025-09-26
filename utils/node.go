@@ -56,5 +56,5 @@ func SortNodes(clusterNodes []models.ClusterNodes) {
 			}
 		}
 	}
-	}
+}
 	

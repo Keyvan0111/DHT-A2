@@ -6,11 +6,18 @@ type ClusterNodes struct {
 }
 
 type Node struct {
-	Host          string
-	Port          string
-	Addr		  string
-	NodeId        int // This is the sum of the hash bytes
-	SuccessorAddr    string
-	PredecessorAddr string
-	Nodes         []*Node // Store pointer to all node stucts
+	Host          		string
+	Port          		string
+	Addr		  		string
+	NodeId        		int // This is the sum of the hash bytes
+	SuccessorAddr    	string
+	PredecessorAddr 	string
+	Nodes         		[]*Node // Store pointer to all node stucts
+}
+
+type SiblingNode struct {
+	Host 	string
+	Port 	string
+	NodeId 	string
+	Addr 	string
 }
