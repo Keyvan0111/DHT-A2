@@ -22,11 +22,14 @@ func SetPeers(myNode *models.Node, clusterNodes []models.ClusterNodes) {
 	successorIndex := (selfIndex + 1) % len(clusterNodes)
 	predecessorIndex := (selfIndex - 1 + len(clusterNodes)) % len(clusterNodes)
 
-	successor := clusterNodes[successorIndex] 
+	successor := clusterNodes[successorIndex]
 	predecessor := clusterNodes[predecessorIndex]
 
 	successorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", successor.Host, successor.Port)
 	predecessorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", predecessor.Host, predecessor.Port)
+
+	myNode.SuccessorId   = ConsistentHash(fmt.Sprintf("%s:%s", successor.Host, successor.Port))
+	myNode.PredecessorId = ConsistentHash(fmt.Sprintf("%s:%s", predecessor.Host, predecessor.Port))
 
 	myNode.SuccessorAddr = successorAddr
 	myNode.PredecessorAddr = predecessorAddr
@@ -57,4 +60,4 @@ func SortNodes(clusterNodes []models.ClusterNodes) {
 		}
 	}
 	}
-	
+
