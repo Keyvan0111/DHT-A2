@@ -45,8 +45,6 @@ func main() {
 			Port: fmt.Sprintf("%d", port),
 			Addr: fmt.Sprintf("http://%s.ifi.uit.no:%d", host, port),
 			NodeId: NodeId,
-			SuccessorAddr: "",
-			PredecessorAddr: "",
 	}
 
 	// If PORT_FILE is set, write the chosen port there so run.sh can read it
