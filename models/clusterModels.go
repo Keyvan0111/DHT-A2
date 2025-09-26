@@ -15,7 +15,7 @@ type Node struct {
 	SuccessorAddr    string
 	PredecessorAddr string
 	SuccessorId     int
-  PredecessorId   int
+  	PredecessorId   int
 	Nodes         []*Node // Store pointer to all node stucts
 	Store sync.Map
 }
