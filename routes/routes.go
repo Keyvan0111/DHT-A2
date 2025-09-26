@@ -7,6 +7,7 @@ import (
 	"main/models"
 )
 
+
 func SetupClusterRoutes(router *gin.Engine, clusterNode *models.Node) {
 	clusterGroup := router.Group("/cluster")
 	{
@@ -20,7 +21,7 @@ func SetupStorageRoutes(router *gin.Engine, clusterNode *models.Node) {
 	storageGroup := router.Group("/storage")
 	{
 		storageGroup.GET("/:key", controllers.GetValue(clusterNode))
-		storageGroup.POST("/:key", controllers.PutValue(clusterNode))
+		storageGroup.PUT("/:key", controllers.PutValue(clusterNode))
 	}
 	
 }

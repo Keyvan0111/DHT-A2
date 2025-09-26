@@ -67,6 +67,8 @@ func main() {
 	router := gin.Default()
 
 	routes.SetupClusterRoutes(router, myNode)
+	routes.SetupNetworkRoutes(router, myNode)
+	routes.SetupStorageRoutes(router, myNode)
 
 	// Routes
 	router.GET("/helloworld", func(c *gin.Context) {

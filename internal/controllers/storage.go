@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -9,8 +10,6 @@ import (
 	"main/models"
 	"main/utils"
 )
-
-
 
 func GetValue(n *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
@@ -37,9 +36,13 @@ func PutValue(n *models.Node) gin.HandlerFunc {
             c.JSON(http.StatusBadRequest, gin.H{"error": "could not read body"})
             return
         }
+
+		
         _, keyId := utils.ConsistentHash(key)
+		fmt.Println("value: ", string(value), "key: ", keyId)
 
         if utils.IsResponsibleFor(keyId, n) {
+			fmt.Printf("Keyid: %d, pred: %d", keyId, n.Predecessor.NodeId)
             n.Store.Store(key, string(value))
             c.Status(http.StatusOK)
             return
