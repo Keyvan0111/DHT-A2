@@ -11,6 +11,7 @@ import (
 	"main/utils"
 )
 
+// GET
 func GetValue(n *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
         key := c.Param("key")
@@ -28,6 +29,7 @@ func GetValue(n *models.Node) gin.HandlerFunc {
     }
 }
 
+// PUT
 func PutValue(n *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
         key := c.Param("key")
@@ -41,7 +43,7 @@ func PutValue(n *models.Node) gin.HandlerFunc {
         _, keyId := utils.ConsistentHash(key)
 		fmt.Println("value: ", string(value), "key: ", keyId)
 
-        if utils.IsResponsibleFor(keyId, n) {
+        if utils.x(keyId, n) {
 			fmt.Printf("Keyid: %d, pred: %d", keyId, n.Predecessor.NodeId)
             n.Store.Store(key, string(value))
             c.Status(http.StatusOK)
@@ -51,6 +53,7 @@ func PutValue(n *models.Node) gin.HandlerFunc {
     }
 }
 
+// GET
 func NetworkInfo(n *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
         c.JSON(http.StatusOK, gin.H{
