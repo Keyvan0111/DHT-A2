@@ -2,20 +2,26 @@ package utils
 
 import (
 	"crypto/sha256"
-	"math"
+	"encoding/hex"
 	"math/big"
 )
 
-const HASHLEN int = 8
+const HASHLEN = 8
 
-func ConsistentHash(key string) int {
-    hash := sha256.Sum256([]byte(key))
+func ConsistentHash(key string) (string, int) {
+	sum := sha256.Sum256([]byte(key))
 
-    num := new(big.Int).SetBytes(hash[:])
+	// full hash as hex string
+	hashHex := hex.EncodeToString(sum[:])
 
-    ringSize := int64(math.Pow(2, float64(HASHLEN)))
+	// convert to big.Int
+	num := new(big.Int).SetBytes(sum[:])
 
-    mod := new(big.Int).Mod(num, big.NewInt(ringSize))
+	// ring size = 2^m
+	ringSize := new(big.Int).Lsh(big.NewInt(1), uint(HASHLEN))
 
-    return int(mod.Int64())
+	// compute position on ring
+	mod := new(big.Int).Mod(num, ringSize)
+
+	return hashHex, int(mod.Int64())
 }

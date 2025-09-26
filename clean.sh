@@ -4,6 +4,8 @@ export PATH=/bin:/usr/bin
 
 ME=`id -un`
 
+rm -f logs/*
+
 if [ x$ME = xroot ]
 then
 	echo "Do not run $0 as root"

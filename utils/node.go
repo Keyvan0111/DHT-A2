@@ -3,9 +3,6 @@ package utils
 import (
 	"fmt"
 	"main/models"
-
-	"strconv"
-	"strings"
 )
 
 func findNodeIndex(clusterNodes []models.ClusterNodes, target *models.Node) int {
@@ -22,58 +19,55 @@ func SetPeers(myNode *models.Node, clusterNodes []models.ClusterNodes) {
 	successorIndex := (selfIndex + 1) % len(clusterNodes)
 	predecessorIndex := (selfIndex - 1 + len(clusterNodes)) % len(clusterNodes)
 
-	successor := clusterNodes[successorIndex] 
+	successor := clusterNodes[successorIndex]
 	predecessor := clusterNodes[predecessorIndex]
 
 	successorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", successor.Host, successor.Port)
 	predecessorAddr := fmt.Sprintf("http://%s.ifi.uit.no:%s", predecessor.Host, predecessor.Port)
 
+	sucHash, sucID := ConsistentHash(successor.Host+":"+successor.Port)
+	predHash, predID := ConsistentHash(predecessor.Host+":"+predecessor.Port)
 	
 	sucessorNode := &models.Peer{
 		Host: successor.Host,
 		Port: successor.Port,
 		Addr: successorAddr,
-		NodeId: ConsistentHash(successor.Host+":"+successor.Port),
+		NodeId: sucID,
+		Hash: sucHash,
 	}
 	
 	predecessorNode := &models.Peer{
 		Host: predecessor.Host,
 		Port: predecessor.Port,
 		Addr: predecessorAddr,
-		NodeId: ConsistentHash(predecessor.Host+":"+predecessor.Port),
+		NodeId: predID,
+		Hash: predHash,
 	}
 	
 	myNode.Successor = *sucessorNode
 	myNode.Predecessor = *predecessorNode
 
-	fmt.Printf("Im Node: %s:%s\n", myNode.Host, myNode.Port)
-	fmt.Printf("My Successor is: %s:%s\n", sucessorNode.Host, sucessorNode.Port)
-	fmt.Printf("My Predecessor is: %s:%s\n", predecessor.Host, predecessor.Port)
+	fmt.Printf("Im Node: %s:%s, Hash: %s ID: %d\n", myNode.Host, myNode.Port, myNode.Hash, myNode.NodeId)
+	fmt.Printf("My Successor is: %s:%s Hash: %s ID: %d\n", sucessorNode.Host, sucessorNode.Port, sucessorNode.Hash, sucessorNode.NodeId)
+	fmt.Printf("My Predecessor is: %s:%s Hash: %s ID: %d\n", predecessor.Host, predecessor.Port, predecessorNode.Hash, predecessorNode.NodeId)
 }
 
 func SortNodes(clusterNodes []models.ClusterNodes) {
-	getParts := func(name string) (int, int) {
-		parts := strings.Split(strings.TrimPrefix(name, "c"), "-")
-		if len(parts) != 2 {
-			return 0, 0
-		}
-		a, _ := strconv.Atoi(parts[0])
-		b, _ := strconv.Atoi(parts[1])
-		return a, b
-	}
+    // compute hash for each node
+    for i := range clusterNodes {
+		_, hashNum := ConsistentHash(
+            clusterNodes[i].Host + ":" + clusterNodes[i].Port,
+        )
+        clusterNodes[i].Hash = hashNum
+    }
 
-	n := len(clusterNodes)
-	for i := 0; i < n-1; i++ {
-		for j := 0; j < n-i-1; j++ {
-			a1, a2 := getParts(clusterNodes[j].Host)
-			b1, b2 := getParts(clusterNodes[j+1].Host)
-
-			// compare
-			if a1 > b1 || (a1 == b1 && a2 > b2) {
-				// swap
-				clusterNodes[j], clusterNodes[j+1] = clusterNodes[j+1], clusterNodes[j]
-			}
-		}
-	}
+    // bubble sort by Hash
+    n := len(clusterNodes)
+    for i := 0; i < n-1; i++ {
+        for j := 0; j < n-i-1; j++ {
+            if clusterNodes[j].Hash > clusterNodes[j+1].Hash {
+                clusterNodes[j], clusterNodes[j+1] = clusterNodes[j+1], clusterNodes[j]
+            }
+        }
+    }
 }
-	

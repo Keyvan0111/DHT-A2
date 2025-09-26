@@ -4,8 +4,8 @@ import (
 	"main/models"
 	"main/utils"
 
-	"net/http"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,14 +20,10 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 
 		utils.SortNodes(clusterNodes)
 		utils.SetPeers(myNode, clusterNodes)
-		fmt.Println(myNode.Host, myNode.Port)
-		fmt.Println(myNode.Successor)
-		fmt.Println(myNode.Predecessor)
+		fmt.Println(myNode)
 
-		fmt.Println("")
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})
 	}
-
 }
 
 func GetDataWithKey() gin.HandlerFunc {

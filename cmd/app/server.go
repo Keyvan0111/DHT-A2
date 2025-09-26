@@ -38,13 +38,14 @@ func main() {
 	host := shortHost()
 	fullHost, _ := os.Hostname()
 
-	NodeId := utils.ConsistentHash(fmt.Sprintf("%s:%d", host, port))
+	nodeHash, NodeId := utils.ConsistentHash(fmt.Sprintf("%s:%d", host, port))
 
 	myNode := &models.Node{
 			Host: host,
 			Port: fmt.Sprintf("%d", port),
 			Addr: fmt.Sprintf("http://%s.ifi.uit.no:%d", host, port),
 			NodeId: NodeId,
+			Hash: nodeHash,
 	}
 
 	// If PORT_FILE is set, write the chosen port there so run.sh can read it

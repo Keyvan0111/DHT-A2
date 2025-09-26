@@ -8,8 +8,27 @@ import (
 )
 
 func SetupClusterRoutes(router *gin.Engine, clusterNode *models.Node) {
-	assistantGroup := router.Group("/cluster") 
+	clusterGroup := router.Group("/cluster")
 	{
-		assistantGroup.POST("/fetch_nodes", controllers.SendAllNodes(clusterNode))
+		clusterGroup.POST("/fetch_nodes", controllers.SendAllNodes(clusterNode))
 	}
+
+	router.GET("/network", controllers.NetworkInfo(clusterNode))
+}
+
+func SetupStorageRoutes(router *gin.Engine, clusterNode *models.Node) {
+	storageGroup := router.Group("/storage")
+	{
+		storageGroup.GET("/:key", controllers.GetValue(clusterNode))
+		storageGroup.POST("/:key", controllers.PutValue(clusterNode))
+	}
+	
+}
+
+func SetupNetworkRoutes(router *gin.Engine, clusterNode *models.Node) {
+	networkGroup := router.Group("/network")
+	{
+		networkGroup.GET("/", controllers.NetworkInfo(clusterNode))
+	}
+	
 }
