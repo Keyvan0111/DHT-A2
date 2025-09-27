@@ -11,6 +11,7 @@ import (
 func SetupClusterRoutes(router *gin.Engine, clusterNode *models.Node) {
 	clusterGroup := router.Group("/cluster")
 	{
+		clusterGroup.GET("/forward/:key", controllers.ForwardNode(clusterNode))
 		clusterGroup.POST("/fetch_nodes", controllers.SendAllNodes(clusterNode))
 	}
 

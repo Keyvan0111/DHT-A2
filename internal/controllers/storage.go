@@ -43,7 +43,7 @@ func PutValue(n *models.Node) gin.HandlerFunc {
         _, keyId := utils.ConsistentHash(key)
 		fmt.Println("value: ", string(value), "key: ", keyId)
 
-        if utils.x(keyId, n) {
+        if utils.IsResponsibleFor(keyId, n) {
 			fmt.Printf("Keyid: %d, pred: %d", keyId, n.Predecessor.NodeId)
             n.Store.Store(key, string(value))
             c.Status(http.StatusOK)
