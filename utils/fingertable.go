@@ -5,71 +5,50 @@ import (
 	"math"
 )
 
-// (start, end] modulo ring
-func BetweenRightIncl(id, start, end int) bool {
-	if start < end {
-		return id > start && id <= end
-	}
-	return id > start || id <= end
-}
+// finds closest node for given key
+func FindClosestNodeByKey(key int, nodes []models.ClusterNodes) models.ClusterNodes {
+	prevNode := nodes[0]
 
-// (start, end) modulo ring
-func BetweenOpen(id, start, end int) bool {
-	if start < end {
-		return id > start && id < end
-	}
-	return id > start || id < end
-}
-
-
-// 15
-func FindSuccessor(finger int, mynode *models.Node) (node *models.Node) {
-	if IsResponsibleFor(finger, mynode) { // check if self responsible
-		return mynode
-	} else if finger > mynode.NodeId && finger <= mynode.Predecessor.NodeId { // successor responsible
-		s := mynode.Successor
-		return &models.Node{
-			Host: s.Host,
-			Port: s.Port,
-			Addr: s.Addr,
-			NodeId: s.NodeId,
-			Hash: s.Hash,
+	for _, node := range nodes {
+		if key <= node.Hash {
+			return node
 		}
-	} else {
-		// response := http("GET", "/forward/1234")
-		// return response
+		prevNode = node
 	}
-	return nil
+
+	return prevNode
+}
+ 
+func FingerTableInit(myNode *models.Node) {
+	initialSplit := int(math.Pow(2, HASHLEN)) / 2;
+	for i := 0; i < HASHLEN; i++ {
+		nextNode := (myNode.NodeId + initialSplit) % RINGSIZE
+		initialSplit /= 2
+
+		closestNode := FindClosestNodeByKey(nextNode, myNode.Nodes)
+		peer := CreatePeer(closestNode.Host, closestNode.Port)
+
+		entry := models.FingerEntry{
+			Key: nextNode,
+			Node: peer,
+		}
+
+		myNode.FingerTable = append(myNode.FingerTable, entry)
+	}
 }
 
+func FindSuccessorAddr(key int, myNode *models.Node) string {
+	fingerTable := myNode.FingerTable
+	if len(fingerTable) == 0 {
+		return ""
+	}
 
-func FingerTableInit(node *models.Node) {
-	for i := range HASHLEN {	
-	 	key := (node.NodeId + (1 << i)) % int(math.Pow(2, HASHLEN))
-
-		successor := FindSuccessor(key, node) // findsuccessor
-
-		node.FingerTable[i] = models.FingerEntry{
-			Key: key,
-			Node: models.Peer{
-                Host:   successor.Host,
-                Port:   successor.Port,
-                Addr:   successor.Addr,
-                Hash:   successor.Hash,
-                NodeId: successor.NodeId,
-            },
+	for _, entry := range fingerTable {
+		if key <= entry.Key {
+			return entry.Node.Addr
 		}
 	}
-}
 
-
-// return best finger strictly in (n, id); else successor
-func ClosestPrecedingFinger(n *models.Node, id int) models.Peer {
-	for i := len(n.FingerTable) - 1; i >= 0; i-- {
-		p := n.FingerTable[i].Node
-		if BetweenOpen(p.NodeId, n.NodeId, id) {
-			return p
-		}
-	}
-	return n.Successor
+	// wrap-around: successor is the first entry
+	return fingerTable[0].Node.Addr
 }

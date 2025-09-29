@@ -25,7 +25,7 @@ func GetValue(n *models.Node) gin.HandlerFunc {
             c.Status(http.StatusNotFound)
             return
         }
-        utils.ForwardGet(n, key, c)
+        utils.ForwardGet(n, key, c, "/storage/")
     }
 }
 
@@ -49,7 +49,7 @@ func PutValue(n *models.Node) gin.HandlerFunc {
             c.Status(http.StatusOK)
             return
         }
-        utils.ForwardPut(n, key, value, c)
+        utils.ForwardPut(n, key, value, c, "/storage/")
     }
 }
 

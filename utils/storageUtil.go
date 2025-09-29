@@ -21,9 +21,11 @@ func IsResponsibleFor(keyId int, node *models.Node) bool {
     return between(keyId, node.Predecessor.NodeId, node.NodeId)
 }
 
-func ForwardGet(n *models.Node, key string, c *gin.Context) {
+func ForwardGet(node *models.Node, key string, c *gin.Context, apiPath string) {
     // Linear implementation for now --> just hop to successor
-    url := n.Successor.Addr + "/storage/" + key
+	// successor := FindSuccessorAddr(keyId, node)
+    url := node.Successor.Addr + apiPath + key
+
     resp, err := http.Get(url)
     if err != nil {
         c.JSON(http.StatusBadGateway, gin.H{"error": "forward GET failed", "detail": err.Error()})
@@ -34,9 +36,9 @@ func ForwardGet(n *models.Node, key string, c *gin.Context) {
     c.Data(resp.StatusCode, "text/plain; charset=utf-8", body)
 }
 
-func ForwardPut(n *models.Node, key string, value []byte, c *gin.Context) {
+func ForwardPut(node *models.Node, key string, value []byte, c *gin.Context, apiPath string) {
     // Forward same endpoint to successor
-    url := n.Successor.Addr + "/storage/" + key
+    url := node.Successor.Addr + apiPath + key
     req, _ := http.NewRequest(http.MethodPut, url, strings.NewReader(string(value)))
     req.Header.Set("Content-Type", "text/plain")
     resp, err := http.DefaultClient.Do(req)

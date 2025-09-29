@@ -7,6 +7,7 @@ import (
 )
 
 const HASHLEN = 8
+const RINGSIZE = 1 << HASHLEN // 2^HASHLEN
 
 func ConsistentHash(key string) (string, int) {
 	sum := sha256.Sum256([]byte(key))

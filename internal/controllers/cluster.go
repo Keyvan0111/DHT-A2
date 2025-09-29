@@ -17,10 +17,16 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"InputError" : "body did not match expected structure _ClusterNodes_"})
 			return
 		}
-
 		utils.SortNodes(clusterNodes)
+		myNode.Nodes = clusterNodes;
 		utils.SetPeers(myNode, clusterNodes)
-		fmt.Println(myNode)
+		utils.FingerTableInit(myNode)
+		
+
+		fmt.Println("My fingertable:")
+		for _, entry := range myNode.FingerTable {
+			fmt.Println(entry)
+		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})
 	}

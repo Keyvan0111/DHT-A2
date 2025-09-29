@@ -1,6 +1,10 @@
 package models
 
-import "sync"
+import (
+	"sync"
+)
+
+
 
 type ClusterNodes struct {
 	Host string `json:"host"`
@@ -22,6 +26,8 @@ type Node struct {
 	Successor   Peer
 	Predecessor Peer
 	Store       sync.Map
+	Nodes 		[]ClusterNodes
+
 	FingerTable []FingerEntry
 }
 

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"main/models"
+
 )
 
 func findNodeIndex(clusterNodes []models.ClusterNodes, target *models.Node) int {
@@ -70,4 +71,15 @@ func SortNodes(clusterNodes []models.ClusterNodes) {
             }
         }
     }
+}
+
+func CreatePeer(host string, port string) models.Peer {
+	hash, id := ConsistentHash(host+":"+port)
+	return models.Peer{
+		Host: host,
+		Port: port,
+		Addr: fmt.Sprintf("http://%s.ifi.uit.no:%s", host, port),
+		Hash: hash,
+		NodeId: id, 
+	}
 }
