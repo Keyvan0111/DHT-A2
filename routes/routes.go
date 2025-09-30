@@ -7,7 +7,6 @@ import (
 	"main/models"
 )
 
-
 func SetupClusterRoutes(router *gin.Engine, clusterNode *models.Node) {
 	clusterGroup := router.Group("/cluster")
 	{
@@ -15,7 +14,6 @@ func SetupClusterRoutes(router *gin.Engine, clusterNode *models.Node) {
 		clusterGroup.POST("/fetch_nodes", controllers.SendAllNodes(clusterNode))
 	}
 
-	router.GET("/network", controllers.NetworkInfo(clusterNode))
 }
 
 func SetupStorageRoutes(router *gin.Engine, clusterNode *models.Node) {
@@ -24,13 +22,13 @@ func SetupStorageRoutes(router *gin.Engine, clusterNode *models.Node) {
 		storageGroup.GET("/:key", controllers.GetValue(clusterNode))
 		storageGroup.PUT("/:key", controllers.PutValue(clusterNode))
 	}
-	
+
 }
 
-func SetupNetworkRoutes(r *gin.Engine, n *models.Node) {
-	ng := r.Group("/network")
+func SetupNetworkRoutes(router *gin.Engine, clusterNode *models.Node) {
+	networkGroup := router.Group("/network")
 	{
-		ng.GET("", controllers.NetworkPeers(n))       // serves /network
-		ng.GET("/info", controllers.NetworkInfo(n))   // serves /network/info
+		networkGroup.GET("/", controllers.NetworkInfo(clusterNode))
 	}
+
 }
