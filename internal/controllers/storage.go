@@ -12,25 +12,30 @@ import (
 )
 
 // GET
-func GetValue(n *models.Node) gin.HandlerFunc {
+func GetValue(node *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
         key := c.Param("key")
         _, keyId := utils.ConsistentHash(key)
-
-        if utils.IsResponsibleFor(keyId, n) {
-            if v, ok := n.Store.Load(key); ok {
+		fmt.Printf("Getting Value: %s (id: %d) into table...\n\n", key, keyId)
+		
+		fmt.Printf("Im node: %d Checking responsibility...\n", node.NodeId)
+        if utils.IsResponsibleFor(keyId, node) {
+			fmt.Printf("Im responsible for %d\n", keyId )
+            if v, ok := node.Store.Load(key); ok {
                 c.String(http.StatusOK, "%s", v.(string))
                 return
             }
             c.Status(http.StatusNotFound)
             return
         }
-        utils.ForwardGet(n, key, c, "/storage/")
+		fmt.Printf("Im not responsible for %d\n", keyId)
+		fmt.Printf("Forwarding...\n\n")
+        utils.ForwardGet(node, keyId, key, c, "/storage/")
     }
 }
 
 // PUT
-func PutValue(n *models.Node) gin.HandlerFunc {
+func PutValue(node *models.Node) gin.HandlerFunc {
     return func(c *gin.Context) {
         key := c.Param("key")
         value, err := io.ReadAll(c.Request.Body)
@@ -38,38 +43,91 @@ func PutValue(n *models.Node) gin.HandlerFunc {
             c.JSON(http.StatusBadRequest, gin.H{"error": "could not read body"})
             return
         }
-
+		fmt.Printf("Putting Value into table...\n\n")
 		
         _, keyId := utils.ConsistentHash(key)
-		fmt.Println("value: ", string(value), "key: ", keyId)
-
-        if utils.IsResponsibleFor(keyId, n) {
-			fmt.Printf("Keyid: %d, pred: %d", keyId, n.Predecessor.NodeId)
-            n.Store.Store(key, string(value))
+		fmt.Printf("Hashing the value: %s -> %d\n", key, keyId)
+		
+		
+		fmt.Printf("Im node: %d Checking responsibility...\n", node.NodeId)
+        if utils.IsResponsibleFor(keyId, node) {
+			fmt.Printf("Im responsible for %d\n", keyId )
+            node.Store.Store(key, string(value))
             c.Status(http.StatusOK)
             return
         }
-        utils.ForwardPut(n, key, value, c, "/storage/")
+		fmt.Printf("Im not responsible for %d\n", keyId)
+		fmt.Printf("Forwarding...\n\n")
+        utils.ForwardPut(node, keyId, key, value, c, "/storage/")
     }
 }
 
-// GET
+// // GET
+// func NetworkInfo(n *models.Node) gin.HandlerFunc {
+//     return func(c *gin.Context) {
+//         c.JSON(http.StatusOK, gin.H{
+//             "self": gin.H{
+//                 "addr": n.Addr,
+//                 "id":   n.NodeId,
+//             },
+//             "predecessor": gin.H{
+//                 "addr": n.Predecessor.Addr,
+//                 "id":   n.Predecessor.NodeId,
+//             },
+//             "successor": gin.H{
+//                 "addr": n.Successor.Addr,
+//                 "id":   n.Successor.NodeId,
+//             },
+//             "hashlen": utils.HASHLEN,
+//         })
+//     }
+// }
+
+
+// /network  -> returns ["host:port", ...] (neighbors list) for the Python client
+func NetworkPeers(n *models.Node) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		peers := make([]string, 0, len(n.Nodes))
+		for _, cn := range n.Nodes {
+			addr := cn.Host + ":" + cn.Port
+			// exclude self if present in the list
+			if addr == n.Addr {
+				continue
+			}
+			peers = append(peers, addr)
+		}
+		c.JSON(http.StatusOK, peers)
+	}
+}
+
+// /network/info -> returns detailed diagnostic info (optional but handy)
 func NetworkInfo(n *models.Node) gin.HandlerFunc {
-    return func(c *gin.Context) {
-        c.JSON(http.StatusOK, gin.H{
-            "self": gin.H{
-                "addr": n.Addr,
-                "id":   n.NodeId,
-            },
-            "predecessor": gin.H{
-                "addr": n.Predecessor.Addr,
-                "id":   n.Predecessor.NodeId,
-            },
-            "successor": gin.H{
-                "addr": n.Successor.Addr,
-                "id":   n.Successor.NodeId,
-            },
-            "hashlen": utils.HASHLEN,
-        })
-    }
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"self": gin.H{
+				"addr": n.Addr,
+				"id":   n.NodeId,
+			},
+			"predecessor": gin.H{
+				"addr": n.Predecessor.Addr,
+				"id":   n.Predecessor.NodeId,
+			},
+			"successor": gin.H{
+				"addr": n.Successor.Addr,
+				"id":   n.Successor.NodeId,
+			},
+			"hashlen": utils.HASHLEN,
+			"fingers": func() []gin.H {
+				out := make([]gin.H, 0, len(n.FingerTable))
+				for _, f := range n.FingerTable {
+					out = append(out, gin.H{
+						"key":  f.Key,
+						"addr": f.Node.Addr,
+						"id":   f.Node.NodeId,
+					})
+				}
+				return out
+			}(),
+		})
+	}
 }

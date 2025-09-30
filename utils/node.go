@@ -48,9 +48,10 @@ func SetPeers(myNode *models.Node, clusterNodes []models.ClusterNodes) {
 	myNode.Successor = *sucessorNode
 	myNode.Predecessor = *predecessorNode
 
-	fmt.Printf("Im Node: %s:%s, Hash: %s ID: %d\n", myNode.Host, myNode.Port, myNode.Hash, myNode.NodeId)
-	fmt.Printf("My Successor is: %s:%s Hash: %s ID: %d\n", sucessorNode.Host, sucessorNode.Port, sucessorNode.Hash, sucessorNode.NodeId)
-	fmt.Printf("My Predecessor is: %s:%s Hash: %s ID: %d\n", predecessor.Host, predecessor.Port, predecessorNode.Hash, predecessorNode.NodeId)
+	fmt.Printf("ID: %d, Im Node: %s:%s, Hash: %s\n", myNode.NodeId ,myNode.Host, myNode.Port, myNode.Hash )
+	fmt.Printf("ID: %d, My Successor is: %s:%s Hash: %s\n", sucessorNode.NodeId ,sucessorNode.Host, sucessorNode.Port, sucessorNode.Hash )
+	fmt.Printf("ID: %d, My Predecessor is: %s:%s Hash: %s\n\n", predecessorNode.NodeId ,predecessor.Host, predecessor.Port, predecessorNode.Hash )
+
 }
 
 func SortNodes(clusterNodes []models.ClusterNodes) {

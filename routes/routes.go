@@ -27,10 +27,10 @@ func SetupStorageRoutes(router *gin.Engine, clusterNode *models.Node) {
 	
 }
 
-func SetupNetworkRoutes(router *gin.Engine, clusterNode *models.Node) {
-	networkGroup := router.Group("/network")
+func SetupNetworkRoutes(r *gin.Engine, n *models.Node) {
+	ng := r.Group("/network")
 	{
-		networkGroup.GET("/", controllers.NetworkInfo(clusterNode))
+		ng.GET("", controllers.NetworkPeers(n))       // serves /network
+		ng.GET("/info", controllers.NetworkInfo(n))   // serves /network/info
 	}
-	
 }

@@ -72,11 +72,9 @@ func main() {
 
 	// Routes
 	router.GET("/helloworld", func(c *gin.Context) {
-		log.Println("Hello server guys!")
 		c.String(200, "%s:%d", host, port)
 	})
 
-	fmt.Println("Hello guys im here!")
 	log.Printf("listening on %s:%d\n", fullHost, port)
 
 	// Use Gin's RunListener to serve on the already-open socket

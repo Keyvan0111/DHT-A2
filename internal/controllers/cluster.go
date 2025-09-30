@@ -25,7 +25,7 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 
 		fmt.Println("My fingertable:")
 		for _, entry := range myNode.FingerTable {
-			fmt.Println(entry)
+			fmt.Printf("%s      |      %d\n", entry.Node.Host, entry.Key)
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})

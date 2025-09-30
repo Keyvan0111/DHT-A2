@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"main/models"
 	"net/http"
@@ -10,43 +11,49 @@ import (
 )
 
 func between(id, start, end int) bool {
-    if start < end {
-        return id > start && id <= end
-    }
-    return id > start || id <= end
+	if start < end {
+		return id > start && id <= end
+	}
+	return id > start || id <= end
 }
 
 func IsResponsibleFor(keyId int, node *models.Node) bool {
 
-    return between(keyId, node.Predecessor.NodeId, node.NodeId)
+	return between(keyId, node.Predecessor.NodeId, node.NodeId)
 }
 
-func ForwardGet(node *models.Node, key string, c *gin.Context, apiPath string) {
-    // Linear implementation for now --> just hop to successor
-	// successor := FindSuccessorAddr(keyId, node)
-    url := node.Successor.Addr + apiPath + key
+func ForwardGet(node *models.Node, keyId int, key string, c *gin.Context, apiPath string) {
+	// Linear implementation for now --> just hop to successor
+	successor := FindPredecessorAddr(keyId, node)
+	fmt.Printf("Finding successor of key: %d", keyId)
+	url := successor + apiPath + key
 
-    resp, err := http.Get(url)
-    if err != nil {
-        c.JSON(http.StatusBadGateway, gin.H{"error": "forward GET failed", "detail": err.Error()})
-        return
-    }
-    defer resp.Body.Close()
-    body, _ := io.ReadAll(resp.Body)
-    c.Data(resp.StatusCode, "text/plain; charset=utf-8", body)
+	resp, err := http.Get(url)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "forward GET failed", "detail": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	c.Data(resp.StatusCode, "text/plain; charset=utf-8", body)
 }
 
-func ForwardPut(node *models.Node, key string, value []byte, c *gin.Context, apiPath string) {
-    // Forward same endpoint to successor
-    url := node.Successor.Addr + apiPath + key
-    req, _ := http.NewRequest(http.MethodPut, url, strings.NewReader(string(value)))
-    req.Header.Set("Content-Type", "text/plain")
-    resp, err := http.DefaultClient.Do(req)
-    if err != nil {
-        c.JSON(http.StatusBadGateway, gin.H{"error": "forward PUT failed", "detail": err.Error()})
-        return
-    }
-    defer resp.Body.Close()
-    io.Copy(io.Discard, resp.Body)
-    c.Status(resp.StatusCode)
+func ForwardPut(node *models.Node, keyId int, key string, value []byte, c *gin.Context, apiPath string) {
+	// Forward same endpoint to successor
+	successor := FindPredecessorAddr(keyId, node)
+	fmt.Printf("Finding successor of key: %d", keyId)
+	url := successor + apiPath + key
+
+	req, _ := http.NewRequest(http.MethodPut, url, strings.NewReader(string(value)))
+	req.Header.Set("Content-Type", "text/plain")
+	resp, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "forward PUT failed", "detail": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	io.Copy(io.Discard, resp.Body)
+	c.Status(resp.StatusCode)
 }
