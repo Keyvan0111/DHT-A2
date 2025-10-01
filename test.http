@@ -1,14 +1,14 @@
 ### Put a value
-PUT http://c11-20.ifi.uit.no:46847/storage/missing-key
+PUT http://c11-2.ifi.uit.no:44513/storage/BIGGER-RIMER-PÅ-N...
 Content-Type: text/plain
 
 hello world
 
 ### Get the value (should return "hello world")
-GET http://c7-30.ifi.uit.no:38303/storage/abc123
+GET http://c7-25.ifi.uit.no:35261/storage/abc123
 
 ### Get a missing value (should return 404)
-GET http://c7-19.ifi.uit.no:39325/storage/missing-key
+GET http://c7-10.ifi.uit.no:42233/storage/KEYNIELIAS
 
 ### Get network info
-GET http://c11-20.ifi.uit.no:46847/network
+GET http://c9-6.ifi.uit.no:46697/network
