@@ -34,7 +34,7 @@ fi
 
 
 # ---------- launch & collect ----------
-declare -a HOSTPORTS=()
+declare -a HOSTPORTS=()x'
 
 for ((i=0; i<NUM; i++)); do
   node="${NODES[$(( i % ${#NODES[@]} ))]}"
