@@ -14,6 +14,9 @@ import (
 // GET
 func GetValue(node *models.Node) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if GuardCrash(node, c) {
+			return
+		}
 		key := c.Param("key")
 		_, keyId := utils.ConsistentHash(key)
 		fmt.Printf("Getting Value: %s (id: %d) into table...\n\n", key, keyId)
@@ -37,6 +40,9 @@ func GetValue(node *models.Node) gin.HandlerFunc {
 // PUT
 func PutValue(node *models.Node) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if GuardCrash(node, c) {
+			return
+		}
 		key := c.Param("key")
 		value, err := io.ReadAll(c.Request.Body)
 		if err != nil {
@@ -61,9 +67,59 @@ func PutValue(node *models.Node) gin.HandlerFunc {
 	}
 }
 
+// // GET
+// func NetworkInfo(n *models.Node) gin.HandlerFunc {
+//     return func(c *gin.Context) {
+//         c.JSON(http.StatusOK, gin.H{
+//             "self": gin.H{
+//                 "addr": n.Addr,
+//                 "id":   n.NodeId,
+//             },
+//             "predecessor": gin.H{
+//                 "addr": n.Predecessor.Addr,
+//                 "id":   n.Predecessor.NodeId,
+//             },
+//             "successor": gin.H{
+//                 "addr": n.Successor.Addr,
+//                 "id":   n.Successor.NodeId,
+//             },
+//             "hashlen": utils.HASHLEN,
+//         })
+//     }
+// }
+
+// /network  -> returns ["host:port", ...] (neighbors list) for the Python client
+func NetworkPeers(n *models.Node) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if GuardCrash(n, c) {
+			return
+		}
+		n.Guard.RLock()
+		nodesCopy := utils.CloneNodes(n.Nodes)
+		selfKey := fmt.Sprintf("%s:%s", n.Host, n.Port)
+		n.Guard.RUnlock()
+
+		peers := make([]string, 0, len(nodesCopy))
+		for _, cn := range nodesCopy {
+			addr := cn.Host + ":" + cn.Port
+			if addr == selfKey {
+				continue
+			}
+			peers = append(peers, addr)
+		}
+		c.JSON(http.StatusOK, peers)
+	}
+}
+
 // GET
 func NetworkInfo(n *models.Node) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if GuardCrash(n, c) {
+			return
+		}
+		n.Guard.RLock()
+		defer n.Guard.RUnlock()
+
 		c.JSON(http.StatusOK, gin.H{
 			"self": gin.H{
 				"addr": n.Addr,
