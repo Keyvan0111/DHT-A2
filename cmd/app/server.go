@@ -14,7 +14,6 @@ import (
 	"main/utils"
 )
 
-
 func shortHost() string {
 	h, err := os.Hostname()
 	if err != nil || h == "" {
@@ -39,14 +38,18 @@ func main() {
 	fullHost, _ := os.Hostname()
 
 	nodeHash, NodeId := utils.ConsistentHash(fmt.Sprintf("%s:%d", host, port))
-	
+
+	portStr := fmt.Sprintf("%d", port)
+	addr := utils.BuildHTTPAddr(host, portStr)
+
 	myNode := &models.Node{
-		Host: host,
-		Port: fmt.Sprintf("%d", port),
-		Addr: fmt.Sprintf("http://%s.ifi.uit.no:%d", host, port),
+		Host:   host,
+		Port:   portStr,
+		Addr:   addr,
 		NodeId: NodeId,
-		Hash: nodeHash,
+		Hash:   nodeHash,
 	}
+	utils.ResetToSingleNode(myNode)
 
 	// If PORT_FILE is set, write the chosen port there so run.sh can read it
 	if path := os.Getenv("PORT_FILE"); path != "" {
@@ -67,8 +70,11 @@ func main() {
 	router := gin.Default()
 
 	routes.SetupClusterRoutes(router, myNode)
+	routes.SetupNodeRoutes(router, myNode)
 	routes.SetupNetworkRoutes(router, myNode)
 	routes.SetupStorageRoutes(router, myNode)
+
+	utils.StartHealthMonitor(myNode)
 
 	// Routes
 	router.GET("/helloworld", func(c *gin.Context) {

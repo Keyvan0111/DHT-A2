@@ -4,7 +4,14 @@ import (
 	"sync"
 )
 
+type NodeState string
 
+const (
+	NodeStateSingle  NodeState = "single"
+	NodeStateActive  NodeState = "active"
+	NodeStateLeaving NodeState = "leaving"
+	NodeStateCrashed NodeState = "crashed"
+)
 
 type ClusterNodes struct {
 	Host string `json:"host"`
@@ -29,6 +36,9 @@ type Node struct {
 	Nodes 		[]ClusterNodes
 
 	FingerTable []FingerEntry
+	Guard         sync.RWMutex
+	State         NodeState
+	LastKnownPeer string
 }
 
 type Peer struct {

@@ -12,16 +12,15 @@ import (
 
 func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if GuardCrash(myNode, c) {
+			return
+		}
 		var clusterNodes []models.ClusterNodes
 		if err := c.ShouldBindJSON(&clusterNodes); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"InputError" : "body did not match expected structure _ClusterNodes_"})
 			return
 		}
-		utils.SortNodes(clusterNodes)
-		myNode.Nodes = clusterNodes;
-		utils.SetPeers(myNode, clusterNodes)
-		utils.FingerTableInit(myNode)
-		
+		utils.UpdateClusterView(myNode, clusterNodes)
 
 		fmt.Println("My fingertable:")
 		for _, entry := range myNode.FingerTable {
@@ -29,5 +28,17 @@ func SendAllNodes(myNode *models.Node) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "got all nodes "})
+	}
+}
+
+func FetchMembers(myNode *models.Node) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if GuardCrash(myNode, c) {
+			return
+		}
+		myNode.Guard.RLock()
+		defer myNode.Guard.RUnlock()
+
+		c.JSON(http.StatusOK, myNode.Nodes)
 	}
 }

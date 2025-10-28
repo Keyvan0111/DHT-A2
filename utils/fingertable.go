@@ -53,7 +53,16 @@ func FingerTableInit(myNode *models.Node) {
 
 // Finger table must already be sorted by Key ascending on init.
 func FindPredecessorAddr(key int, n *models.Node) string {
-	if n == nil || len(n.FingerTable) == 0 {
+	if n == nil {
+		return ""
+	}
+
+	n.Guard.RLock()
+	table := make([]models.FingerEntry, len(n.FingerTable))
+	copy(table, n.FingerTable)
+	n.Guard.RUnlock()
+
+	if len(table) == 0 {
 		return ""
 	}
 
@@ -64,7 +73,7 @@ func FindPredecessorAddr(key int, n *models.Node) string {
 		k     int
 	)
 
-	for _, e := range n.FingerTable {
+	for _, e := range table {
 		if e.Key < key {
 			found = true
 			addr = e.Node.Addr
@@ -81,7 +90,7 @@ func FindPredecessorAddr(key int, n *models.Node) string {
 	}
 
 	// No entry with Key < key → wrap to the last entry
-	last := n.FingerTable[len(n.FingerTable)-1]
+	last := table[len(table)-1]
 	fmt.Printf("Wrapping to last entry: %s (%d)\n", last.Node.Host, last.Key)
 	return last.Node.Addr
 }

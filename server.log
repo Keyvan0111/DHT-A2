@@ -1,0 +1,18 @@
+2025/10/28 13:59:28 listening on tromso-studenter3-3159.wifi.uit.no:65268
+[GIN] 2025/10/28 - 13:59:35 | 200 |      40.666µs |       127.0.0.1 | GET      "/helloworld"
+Putting Value into table...
+
+Hashing the value: testkey -> 137
+Im node: 125 Checking responsibility...
+Im responsible for 137
+[GIN] 2025/10/28 - 13:59:40 | 200 |     258.167µs |       127.0.0.1 | PUT      "/storage/testkey"
+Getting Value: testkey (id: 137) into table...
+
+Im node: 125 Checking responsibility...
+Im responsible for 137
+[GIN] 2025/10/28 - 13:59:40 | 200 |      80.917µs |       127.0.0.1 | GET      "/storage/testkey"
+[GIN] 2025/10/28 - 13:59:40 | 200 |     124.334µs |       127.0.0.1 | GET      "/node-info"
+[GIN] 2025/10/28 - 13:59:40 | 200 |      95.625µs |       127.0.0.1 | POST     "/leave"
+[GIN] 2025/10/28 - 13:59:40 | 200 |      14.833µs |       127.0.0.1 | POST     "/sim-crash"
+[GIN] 2025/10/28 - 13:59:40 | 200 |       41.75µs |       127.0.0.1 | POST     "/sim-recover"
+[GIN] 2025/10/28 - 13:59:40 | 200 |    3.050959ms |       127.0.0.1 | POST     "/join?nprime=localhost:10001"
